@@ -1,3 +1,34 @@
+#!/bin/bash
+# 检查 jq 是否已经安装
+if ! [ -x "$(command -v jq)" ]; then
+  echo 'jq 没有安装，正在尝试安装...'
+  sudo apt-get update
+  sudo apt-get install -y jq
+fi
+# 当前的脚本和游戏版本
+currentScriptVersion="0.1.3"
+currentGameVersion="1.3"
+
+# 从服务器获取版本信息
+versionInfo=$(curl -s https://www.xuehaiwu.com/wp-content/uploads/shell/Pal/version.json)
+
+# 解析JSON以获取最新的脚本和游戏版本
+latestScriptVersion=$(echo $versionInfo | jq -r '.scriptVersion')
+latestGameVersion=$(echo $versionInfo | jq -r '.gameVersion')
+
+# 比较脚本版本
+if [[ $(echo -e "$currentScriptVersion\n$latestScriptVersion" | sort -V | head -n 1) != $latestScriptVersion ]]; then
+    echo "新的脚本版本可用，你的版本为 $currentScriptVersion，最新版本为 $latestScriptVersion。正在下载新版本..."
+    # 下载新版本的脚本
+    curl -O https://www.xuehaiwu.com/wp-content/uploads/shell/Pal/PalServerInstall.sh
+    chmod +x PalServerInstall.sh
+    exit
+fi
+
+# 比较游戏版本
+if [[ $(echo -e "$currentGameVersion\n$latestGameVersion" | sort -V | head -n 1) != $latestGameVersion ]]; then
+    echo "新的游戏版本可用，你的版本为 $currentGameVersion，最新版本为 $latestGameVersion。请升级。"
+fi
 #!/usr/bin/env bash
 #Blog:https://www.xuehaiwu.com/
 
@@ -40,7 +71,7 @@ install_pal_server(){
         echo -e "${Green}开始安装幻兽帕鲁服务端...${Font}"
         CONTAINER_ID=$(docker run -dit --name steamcmd --net host cm2network/steamcmd)
         docker exec -it $CONTAINER_ID bash -c "/home/steam/steamcmd/steamcmd.sh +login anonymous +app_update 2394010 validate +quit"
-        wget https://www.xuehaiwu.com/wp-content/uploads/shell/Pal/restart.sh &&chmod +x restart.sh 
+        wget -O restart.sh https://www.xuehaiwu.com/wp-content/uploads/shell/Pal/restart.sh --no-check-certificate &&chmod +x restart.sh 
         ./restart.sh
         echo -e "${Green}幻兽帕鲁服务端已成功安装并启动！${Font}"
     fi
@@ -57,7 +88,17 @@ start_pal_server(){
         echo -e "${Red}幻兽帕鲁服务端不存在，启动失败！${Font}"
     fi
 }
-
+#更新幻兽帕鲁服务端
+update_pal_server(){
+    if [ $(docker ps -a -q -f name=steamcmd) ]; then
+        echo -e "${Green}开始启动幻兽帕鲁服务端...${Font}"
+        docker exec -it steamcmd /bin/bash -c "/home/steam/steamcmd/steamcmd.sh +login anonymous +app_update 2394010 validate +quit"
+        ./restart.sh
+        echo -e "${Green}幻兽帕鲁服务端已成功启动！${Font}"
+    else
+        echo -e "${Red}幻兽帕鲁服务端不存在，启动失败！${Font}"
+    fi
+}
 #停止幻兽帕鲁服务端
 stop_pal_server(){
     if [ $(docker ps -a -q -f name=steamcmd) ]; then
@@ -197,6 +238,7 @@ install_docker
 clear
 echo -e "———————————————————————————————————————"
 echo -e "${Green}Linux VPS一键安装管理幻兽帕鲁服务端脚本${Font}"
+echo -e "${Green}脚本版本${currentScriptVersion}${Font}"
 echo -e "${Green}教程地址：https://www.xuehaiwu.com/palworld-server/${Font}"
 echo -e "${Green}1、安装幻兽帕鲁服务端${Font}"
 echo -e "${Green}2、启动幻兽帕鲁服务端${Font}"
@@ -207,9 +249,10 @@ echo -e "${Green}6、删除swap内存${Font}"
 echo -e "${Green}7、增加定时重启${Font}"
 echo -e "${Green}8、重启幻兽帕鲁服务端${Font}"
 echo -e "${Green}9、查看幻兽帕鲁服务端状态${Font}"
-echo -e "${Green}10、删除幻兽帕鲁服务端${Font}"
+echo -e "${Green}10、更新幻兽帕鲁服务端${Font}"
+echo -e "${Green}11、删除幻兽帕鲁服务端${Font}"
 echo -e "———————————————————————————————————————"
-read -p "请输入数字 [1-9]:" num
+read -p "请输入数字 [1-11]:" num
 case "$num" in
     1)
     install_pal_server
@@ -238,12 +281,16 @@ case "$num" in
    9)
     check_pal_server_status
     ;;
-    10)
+	10)
+    update_pal_server
+    ;;
+    11)
     delete_pal_server
     ;;
     *)
+	
     clear
-    echo -e "${Green}请输入正确数字 [1-10]${Font}"
+    echo -e "${Green}请输入正确数字 [1-11]${Font}"
     sleep 2s
     main
     ;;

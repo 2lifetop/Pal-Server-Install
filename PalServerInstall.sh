@@ -7,7 +7,7 @@ Red="\033[31m"
 
 
 DATETIME_DIR="$(date +\%Y-\%m-\%d\%H\%M\%S)"
-BACKUP_DIR="/home/steam/Palword/Saved/$DATETIME_DIR"
+BACKUP_DIR="./Saved/$DATETIME_DIR"
 
 #root权限
 root_need(){
@@ -41,7 +41,10 @@ backup_word() {
     if [ $(docker ps -a -q -f name=steamcmd) ]; then
         echo -e "${Green}开始备份幻兽帕鲁存档...${Font}"
         CONTAINER_ID=$(docker ps -a -q -f name=steamcmd)
-        docker exec -it $CONTAINER_ID bash -c "mkdir -p $BACKUP_DIR && cp -a /home/steam/Steam/steamapps/common/PalServer/Pal/Saved/SaveGames/0 $BACKUP_DIR"
+        mkdir -p "$BACKUP_DIR"
+        docker cp -a steamcmd:/home/steam/Steam/steamapps/common/PalServer/Pal/Saved/SaveGames/0 "$BACKUP_DIR"
+        tar -czvf "$BACKUP_DIR.tar.gz" -C "$BACKUP_DIR" .
+        rm -rf "$BACKUP_DIR"
 
         echo -e "${Green}备份幻兽帕鲁存档成功，备份文件夹为 $DATETIME_DIR${Font}"
     else
@@ -55,7 +58,7 @@ install_pal_server(){
         echo -e "${Red}幻兽帕鲁服务端已存在，安装失败！${Font}"
     else
         echo -e "${Green}开始安装幻兽帕鲁服务端...${Font}"
-        CONTAINER_ID=$(docker run -dit --name steamcmd -v ./Saved:/home/steam/Palword/Saved --net host cm2network/steamcmd)
+        CONTAINER_ID=$(docker run -dit --name steamcmd  --net host cm2network/steamcmd)
         docker exec -it $CONTAINER_ID bash -c "/home/steam/steamcmd/steamcmd.sh +login anonymous +app_update 2394010 validate +quit"
         wget https://www.xuehaiwu.com/wp-content/uploads/shell/Pal/restart.sh &&chmod +x restart.sh
         ./restart.sh
@@ -98,6 +101,7 @@ check_pal_server_status(){
         echo -e "${Red}幻兽帕鲁服务端不存在！${Font}"
     fi
 }
+
 #修改服务端配置
 modify_config(){
     if [ $(docker ps -a -q -f name=steamcmd) ]; then

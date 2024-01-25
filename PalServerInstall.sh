@@ -99,7 +99,7 @@ modify_config(){
 #增加swap内存
 add_swap(){
 echo -e "${Green}请输入需要添加的swap，建议为内存的2倍！${Font}"
-read -p "请输入swap数值:" swapsize
+read -p "请输入swap数值单位MB:" swapsize
 
 #检查是否存在swapfile
 grep -q "swapfile" /etc/fstab
@@ -119,7 +119,22 @@ else
     echo -e "${Red}swapfile已存在，swap设置失败，请先运行脚本删除swap后重新设置！${Font}"
 fi
 }
+del_swap(){
+#检查是否存在swapfile
+grep -q "swapfile" /etc/fstab
 
+#如果存在就将其移除
+if [ $? -eq 0 ]; then
+	echo -e "${Green}swapfile已发现，正在将其移除...${Font}"
+	sed -i '/swapfile/d' /etc/fstab
+	echo "3" > /proc/sys/vm/drop_caches
+	swapoff -a
+	rm -f /swapfile
+    echo -e "${Green}swap已删除！${Font}"
+else
+	echo -e "${Red}swapfile未发现，swap删除失败！${Font}"
+fi
+}
 #增加定时重启
 add_restart(){
     if [ $(docker ps -a -q -f name=steamcmd) ]; then
@@ -182,15 +197,17 @@ install_docker
 clear
 echo -e "———————————————————————————————————————"
 echo -e "${Green}Linux VPS一键安装管理幻兽帕鲁服务端脚本${Font}"
+echo -e "${Green}教程地址：https://www.xuehaiwu.com/palworld-server/${Font}"
 echo -e "${Green}1、安装幻兽帕鲁服务端${Font}"
 echo -e "${Green}2、启动幻兽帕鲁服务端${Font}"
 echo -e "${Green}3、停止幻兽帕鲁服务端${Font}"
 echo -e "${Green}4、修改服务端配置${Font}"
 echo -e "${Green}5、增加swap内存${Font}"
-echo -e "${Green}6、增加定时重启${Font}"
-echo -e "${Green}7、重启幻兽帕鲁服务端${Font}"
-echo -e "${Green}8、查看幻兽帕鲁服务端状态${Font}"
-echo -e "${Green}9、删除幻兽帕鲁服务端${Font}"
+echo -e "${Green}6、删除swap内存${Font}"
+echo -e "${Green}7、增加定时重启${Font}"
+echo -e "${Green}8、重启幻兽帕鲁服务端${Font}"
+echo -e "${Green}9、查看幻兽帕鲁服务端状态${Font}"
+echo -e "${Green}10、删除幻兽帕鲁服务端${Font}"
 echo -e "———————————————————————————————————————"
 read -p "请输入数字 [1-9]:" num
 case "$num" in
@@ -210,20 +227,23 @@ case "$num" in
     add_swap
     ;;
     6)
-    add_restart
+    del_swap
     ;;
     7)
-    restart_pal_server
+    add_restart
     ;;
     8)
+    restart_pal_server
+    ;;
+   9)
     check_pal_server_status
     ;;
-    9)
+    10)
     delete_pal_server
     ;;
     *)
     clear
-    echo -e "${Green}请输入正确数字 [1-9]${Font}"
+    echo -e "${Green}请输入正确数字 [1-10]${Font}"
     sleep 2s
     main
     ;;

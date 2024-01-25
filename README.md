@@ -1,6 +1,6 @@
 # 🎮 Pal-Server-Install
 
-这是一个用于安装和管理 Pal-Server 的脚本。
+这是一个用于安装和管理 幻兽帕鲁服务端 的脚本。
 
 🔗 **教程地址**：
 [https://www.xuehaiwu.com/palworld-server/](https://www.xuehaiwu.com/palworld-server/)
@@ -18,7 +18,7 @@
 
 ## 🚀 快速开始
 
-在你的服务器上运行以下命令来安装和启动 Pal-Server：
+在你的服务器上运行以下命令来安装和启动 幻兽帕鲁服务端：
 
 ```bash
 wget -O PalServerInstall.sh https://mirror.ghproxy.com/https://raw.githubusercontent.com/2lifetop/Pal-Server-Install/main/PalServerInstall.sh && chmod +x PalServerInstall.sh && ./PalServerInstall.sh

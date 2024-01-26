@@ -362,13 +362,15 @@ import_pal_server(){
 # 导出幻兽帕鲁存档及配置
 export_pal_server() {
     if check_docker_container; then
+        local timestamp=$(date "+%Y-%m-%d_%H:%M:%S")
+        local backup_dir="/data/backup/backup_$timestamp/"
         echo -e "${Green}此操作会导出容器内 /home/steam/Steam/steamapps/common/PalServer/Pal/Saved 文件夹下所有的文件${Font}"
-        echo -e "${Green}导出的幻兽帕鲁存档及配置将会存放在 /data/palworld 目录下！${Font}"
+        echo -e "${Green}导出的幻兽帕鲁存档及配置将会存放在 $backup_dir 目录下！${Font}"
         echo -e "${Green}开始导出幻兽帕鲁存档及配置...${Font}"
-        mkdir -p /data/palworld
-        docker cp steamcmd:/home/steam/Steam/steamapps/common/PalServer/Pal/Saved/ /data/palworld/
+        mkdir -p "$backup_dir"
+        docker cp steamcmd:/home/steam/Steam/steamapps/common/PalServer/Pal/Saved/ "$backup_dir"
         check_result "导出存档及配置"
-        echo -e "${Green}幻兽帕鲁存档及配置已成功导出！${Font}"
+        echo -e "${Green}幻兽帕鲁存档及配置已成功导出到 $backup_dir 目录！${Font}"
     else
         echo -e "${Red}幻兽帕鲁服务端不存在，导出失败！${Font}"
     fi

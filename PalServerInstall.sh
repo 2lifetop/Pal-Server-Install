@@ -1,5 +1,6 @@
 #!/bin/bash
-
+# 当前的脚本版本
+currentScriptVersion="0.1.5"
 # 定义一些颜色和格式
 Green="\033[32m"
 Font="\033[0m"
@@ -38,8 +39,7 @@ if ! [ -x "$(command -v jq)" ]; then
     check_result "jq 安装"
 fi
 
-# 当前的脚本版本
-currentScriptVersion="0.1.4"
+
 # 从服务器获取版本信息
 versionInfo=$(curl -s https://www.xuehaiwu.com/wp-content/uploads/shell/Pal/version.json)
 check_result "获取版本信息"

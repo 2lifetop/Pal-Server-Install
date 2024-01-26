@@ -8,7 +8,7 @@ Red="\033[31m"
 # 检查命令的执行结果
 check_result() {
     if [ $? -ne 0 ]; then
-        echo -e "${Red}\$1 失败${Font}"
+        echo -e "${Red}$1 失败${Font}"
         exit 1
     fi
 }
@@ -158,12 +158,14 @@ stop_pal_server(){
 
 #修改服务端配置
 modify_config(){
-    if [ $(docker ps -a -q -f name=steamcmd) ]; then
+    if check_docker_container; then
         if [ -f ./PalWorldSettings.ini ]; then
             echo -e "${Green}开始修改服务端配置...${Font}"
+            docker restart steamcmd
+            check_result "停止服务端"
             docker cp ./PalWorldSettings.ini steamcmd:/home/steam/Steam/steamapps/common/PalServer/Pal/Saved/Config/LinuxServer/
             check_result "修改服务端配置"
-            echo -e "${Green}服务端配置已成功修改！服务端重启后生效！${Font}"
+            echo -e "${Green}服务端配置已成功修改！服务端已停止，重启后生效！${Font}"
         else
             echo -e "${Red}未找到服务端配置文件，请前往https://www.xuehaiwu.com/Pal/进行下载。${Font}"
         fi
@@ -215,11 +217,11 @@ fi
 }
 #增加定时重启
 add_restart(){
-    if [ $(docker ps -a -q -f name=steamcmd) ]; then
+    if check_docker_container; then
         echo -e "${Green}开始增加定时重启...${Font}"
         echo -e "${Green}1、每天凌晨5点${Font}"
         echo -e "${Green}2、每周三凌晨5点${Font}"
-        echo -e "${Green}3、自定义${Font}"
+        echo -e "${Green}3、每多少小时重启一次${Font}"
         read -p "请输入数字 [1-3]:" num
         case "$num" in
             1)
@@ -231,8 +233,8 @@ add_restart(){
             check_result "添加定时任务"
             ;;
             3)
-            read -p "请输入定时重启的cron表达式:" cron
-            echo "$cron cd $(pwd) && ./restart.sh" >> /etc/crontab
+            read -p "请输入每多少小时重启一次:" hours
+            echo "0 */$hours * * * cd $(pwd) && ./restart.sh" >> /etc/crontab
             check_result "添加定时任务"
             ;;
             *)

@@ -8,7 +8,7 @@ Red="\033[31m"
 # 检查命令的执行结果
 check_result() {
     if [ $? -ne 0 ]; then
-        echo -e "${Red}\$1 失败${Font}"
+        echo -e "${Red}$1 失败${Font}"
         exit 1
     fi
 }

@@ -1,6 +1,7 @@
 # 🎮 Pal-Server-Install
 
 这是一个用于安装和管理 幻兽帕鲁服务端 的脚本。
+幻兽帕鲁交流群：156131989 。群内有群友专享的公益服，有疑问也可以进群询问
 
 🔗 **教程地址**：
 [https://www.xuehaiwu.com/palworld-server/](https://www.xuehaiwu.com/palworld-server/)

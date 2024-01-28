@@ -225,28 +225,28 @@ add_restart(){
         read -p "请输入数字 [1-3]:" num
         case "$num" in
             1)
-            echo "0 5 * * * cd $(pwd) && ./restart.sh" >> /etc/crontab
-            check_result "添加定时任务"
+            echo "0 5 * * * /bin/bash $(pwd)/restart.sh >> $(pwd)/crontab.log" > mycron
             ;;
             2)
-            echo "0 5 * * 3 cd $(pwd) && ./restart.sh" >> /etc/crontab
-            check_result "添加定时任务"
+            echo "0 5 * * 3 /bin/bash $(pwd)/restart.sh >> $(pwd)/crontab.log" > mycron
             ;;
             3)
             read -p "请输入每多少小时重启一次:" hours
-            echo "0 */$hours * * * cd $(pwd) && ./restart.sh" >> /etc/crontab
-            check_result "添加定时任务"
+            echo "0 */$hours * * * /bin/bash $(pwd)/restart.sh >> $(pwd)/crontab.log" > mycron
             ;;
             *)
             echo -e "${Red}请输入正确数字 [1-3]${Font}"
             add_restart
             ;;
         esac
+        crontab mycron
+        rm mycron
         echo -e "${Green}定时重启已成功增加！${Font}"
     else
         echo -e "${Red}幻兽帕鲁服务端不存在，增加定时重启失败！${Font}"
     fi
 }
+
 #重启幻兽帕鲁服务端
 restart_pal_server(){
     if check_docker_container; then
@@ -318,7 +318,7 @@ update_patch_version() {
         echo "已经是最新优化补丁，无需更新。"
     else
         # 询问用户是否要更新至最新版补丁
-        read -p "新的补丁版本可用，版本为 $latestPatchVersion。是否要更新至最新版补丁? (y/n) " answer
+        read -p "目前linux有两个版本的服务器，本补丁是基于Palworld Dedicated Server (ID：2394010 )，请先核实是否一致，如果不懂请勿更新。新的补丁版本可用，版本为 $latestPatchVersion。是否要更新至最新版补丁? (y/n) " answer
         case ${answer:0:1} in
             y|Y )
                 # 下载最新的补丁版本

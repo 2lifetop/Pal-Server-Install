@@ -1,6 +1,6 @@
 #!/bin/bash
 # 当前的脚本版本
-currentScriptVersion="0.1.7"
+currentScriptVersion="0.1.8"
 # 定义一些颜色和格式
 Green="\033[32m"
 Font="\033[0m"
@@ -139,6 +139,11 @@ check_backup_script(){
         wget -O backup.sh https://www.xuehaiwu.com/wp-content/uploads/shell/Pal/backup.sh --no-check-certificate && chmod +x backup.sh
     fi
 }
+
+add_task_to_crontab() {
+    local cron_task=$1
+    (crontab -l 2>/dev/null; echo "$cron_task") | crontab -
+}
 #安装幻兽帕鲁服务端
 install_pal_server(){
     if check_docker_container; then
@@ -261,28 +266,25 @@ add_restart(){
         read -p "请输入数字 [1-3]:" num
         case "$num" in
             1)
-            echo "0 5 * * * /bin/bash $(pwd)/restart.sh >> $(pwd)/crontab.log" > mycron
+            add_task_to_crontab "0 5 * * * /bin/bash $(pwd)/restart.sh >> $(pwd)/crontab.log"
             ;;
             2)
-            echo "0 5 * * 3 /bin/bash $(pwd)/restart.sh >> $(pwd)/crontab.log" > mycron
+            add_task_to_crontab "0 5 * * 3 /bin/bash $(pwd)/restart.sh >> $(pwd)/crontab.log"
             ;;
             3)
             read -p "请输入每多少小时重启一次:" hours
-            echo "0 */$hours * * * /bin/bash $(pwd)/restart.sh >> $(pwd)/crontab.log" > mycron
+            add_task_to_crontab "0 */$hours * * * /bin/bash $(pwd)/restart.sh >> $(pwd)/crontab.log"
             ;;
             *)
             echo -e "${Red}请输入正确数字 [1-3]${Font}"
             add_restart
             ;;
         esac
-        crontab mycron
-        rm mycron
         echo -e "${Green}定时重启已成功增加！${Font}"
     else
         echo -e "${Red}重启脚本不存在或者幻兽帕鲁服务端不存在，增加定时重启失败！${Font}"
     fi
 }
-
 #重启幻兽帕鲁服务端
 restart_pal_server(){
     if check_docker_container; then
@@ -463,22 +465,20 @@ add_backup(){
         read -p "请输入数字 [1-3]:" num
         case "$num" in
             1)
-            echo "0 5 * * * /bin/bash $(pwd)/backup.sh >> $(pwd)/crontab.log" > mycron
+            add_task_to_crontab "0 5 * * * /bin/bash $(pwd)/backup.sh >> $(pwd)/crontab.log"
             ;;
             2)
-            echo "0 5 * * 3 /bin/bash $(pwd)/backup.sh >> $(pwd)/crontab.log" > mycron
+            add_task_to_crontab "0 5 * * 3 /bin/bash $(pwd)/backup.sh >> $(pwd)/crontab.log"
             ;;
             3)
             read -p "请输入每多少小时备份一次:" hours
-            echo "0 */$hours * * * /bin/bash $(pwd)/backup.sh >> $(pwd)/crontab.log" > mycron
+            add_task_to_crontab "0 */$hours * * * /bin/bash $(pwd)/backup.sh >> $(pwd)/crontab.log"
             ;;
             *)
             echo -e "${Red}请输入正确数字 [1-3]${Font}"
             add_backup
             ;;
         esac
-        crontab mycron
-        rm mycron
         echo -e "${Green}定时备份已成功增加！${Font}"
     else
         echo -e "${Red}备份脚本不存在或者服务端未安装，增加定时备份失败！${Font}"

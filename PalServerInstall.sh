@@ -203,6 +203,9 @@ modify_config(){
             docker restart steamcmd
             check_result "停止服务端"
             docker cp ./PalWorldSettings.ini steamcmd:/home/steam/Steam/steamapps/common/PalServer/Pal/Saved/Config/LinuxServer/
+            check_result "复制配置文件至容器"
+            docker exec -u root steamcmd chmod 777 /home/steam/Steam/steamapps/common/PalServer/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+            check_result "修改配置文件权限"
             check_result "修改服务端配置"
             echo -e "${Green}服务端配置已成功修改！服务端已停止，重启后生效！${Font}"
         else

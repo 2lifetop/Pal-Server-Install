@@ -153,7 +153,7 @@ install_pal_server(){
         read -p "请输入数字 :" maxSize
         check_numeric_input maxSize
         echo -e "${Green}开始安装幻兽帕鲁服务端...${Font}"
-        CONTAINER_ID=$(docker run -dit --m=$maxSizeG --restart=always --name steamcmd --net host cm2network/steamcmd)
+        CONTAINER_ID=$(docker run -dit -m=$maxSizeG --restart=always --name steamcmd --net host cm2network/steamcmd)
         check_result "创建 Docker 容器"
         docker exec -it $CONTAINER_ID bash -c "/home/steam/steamcmd/steamcmd.sh +login anonymous +app_update 2394010 validate +quit"
         check_result "安装游戏"

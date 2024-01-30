@@ -149,8 +149,11 @@ install_pal_server(){
     if check_docker_container; then
         echo -e "${Red}幻兽帕鲁服务端已存在，安装失败！${Font}"
     else
+        echo -e "请输入幻兽帕鲁服务端可占用的最大内存，建议取值为用户服务器最大内存 - 2"
+        read -p "请输入数字 :" maxSize
+        check_numeric_input maxSize
         echo -e "${Green}开始安装幻兽帕鲁服务端...${Font}"
-        CONTAINER_ID=$(docker run -dit --name steamcmd --net host cm2network/steamcmd)
+        CONTAINER_ID=$(docker run -dit --m=$maxSizeG --restart=always --name steamcmd --net host cm2network/steamcmd)
         check_result "创建 Docker 容器"
         docker exec -it $CONTAINER_ID bash -c "/home/steam/steamcmd/steamcmd.sh +login anonymous +app_update 2394010 validate +quit"
         check_result "安装游戏"

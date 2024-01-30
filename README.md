@@ -63,3 +63,6 @@ wget -O PalServerInstall.sh https://mirror.ghproxy.com/https://raw.githubusercon
 
 
 ![](https://image.xuehaiwu.com/2024/01/26/Termius_ZvlU3EAlxb.png)
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=2lifetop/Pal-Server-Install&type=Date)](https://star-history.com/#2lifetop/Pal-Server-Install&Date)

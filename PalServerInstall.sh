@@ -39,6 +39,13 @@ if ! [ -x "$(command -v jq)" ]; then
     check_result "jq 安装"
 fi
 
+# 检查 mkswap 和 swapon 是否已经安装
+if ! [ -x "$(command -v mkswap)" ] || ! [ -x "$(command -v swapon)" ]; then
+    echo 'mkswap 或 swapon 没有安装，正在尝试安装...'
+    sudo apt-get update
+    sudo apt-get install -y util-linux
+    echo "mkswap 和 swapon 安装完毕"
+fi
 
 # 从服务器获取版本信息
 versionInfo=$(curl -s https://www.xuehaiwu.com/wp-content/uploads/shell/Pal/version.json)

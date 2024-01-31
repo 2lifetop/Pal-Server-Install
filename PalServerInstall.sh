@@ -1,6 +1,6 @@
 #!/bin/bash
 # 当前的脚本版本
-currentScriptVersion="0.1.8"
+currentScriptVersion="0.1.9"
 # 定义一些颜色和格式
 Green="\033[32m"
 Font="\033[0m"
@@ -38,6 +38,17 @@ if ! [ -x "$(command -v jq)" ]; then
     sudo apt-get install -y jq
     check_result "jq 安装"
 fi
+
+# 检查 bc 是否已经安装
+check_bc(){
+    if ! [ -x "$(command -v bc)" ]; then
+    echo 'bc 没有安装，正在尝试安装...'
+    sudo apt-get update
+    sudo apt-get install -y bc
+    check_result "bc 安装"
+fi
+}
+
 
 # 检查 mkswap 和 swapon 是否已经安装
 if ! [ -x "$(command -v mkswap)" ] || ! [ -x "$(command -v swapon)" ]; then
@@ -92,6 +103,81 @@ if [[ $(echo -e "$currentPatchVersion\n$latestPatchVersion" | sort -V | head -n 
     echo "新的补丁版本可用，你的版本为 $currentPatchVersion，最新版本为 $latestPatchVersion。请升级。"
     sleep 2s
 fi
+#检测mcrcon
+check_mcrcon(){
+    if [ ! -f "$(pwd)/mcrcon" ]; then
+        echo -e "${Red}当前目录不包含备份脚本，正在下载...${Font}"
+        wget -O mcrcon https://www.xuehaiwu.com/wp-content/uploads/shell/Pal/mcrcon --no-check-certificate && chmod +x mcrcon
+    fi
+}
+#检测rcon.sh
+check_rcon(){
+    if [ ! -f "$(pwd)/rcon.sh" ]; then
+        echo -e "${Red}当前目录不包含备份脚本，正在下载...${Font}"
+        wget -O rcon.sh https://www.xuehaiwu.com/wp-content/uploads/shell/Pal/rcon.sh --no-check-certificate && chmod +x rcon.sh
+    fi
+}
+# 创建rcon配置
+create_config() {
+    # 检查是否存在 config.json 文件
+    if [ ! -f config.json ]; then
+        echo "config.json 文件不存在。你想要创建它吗? (Y/N)"
+        read answer
+
+        if [ "$answer" != "${answer#[Yy]}" ] ;then
+            echo "请输入以下参数（按回车使用默认值）："
+
+            # RCON_HOST
+            echo "RCON_HOST (默认值: 127.0.0.1)："
+            read RCON_HOST
+            RCON_HOST=${RCON_HOST:-127.0.0.1}
+
+            # RCON_PORT
+            echo "RCON_PORT (默认值: 25575)："
+            read RCON_PORT
+            RCON_PORT=${RCON_PORT:-25575}
+
+            # MEMORY_USAGE_THRESHOLD
+            echo "MEMORY_USAGE_THRESHOLD docker容器内存阈值 (默认值: 95)："
+            read MEMORY_USAGE_THRESHOLD
+            MEMORY_USAGE_THRESHOLD=${MEMORY_USAGE_THRESHOLD:-95}
+
+            # RCON_PASSWORD
+            while true; do
+                echo "管理员密码 (必须输入)："
+                read RCON_PASSWORD
+                if [ -z "$RCON_PASSWORD" ]; then
+                    echo "管理员密码 是必须的。请重新输入。"
+                else
+                    break
+                fi
+            done
+
+            # MAX_MEMORY
+            # 获取系统总内存（GB），并计算80%作为默认值
+            DEFAULT_MAX_MEMORY=$(awk '/MemTotal/ {printf "%.0f", $2/1024/1024*0.8}' /proc/meminfo)
+            echo "最大内存（单位GB，默认值为服务器内存的80%：$DEFAULT_MAX_MEMORY GB）："
+            read MAX_MEMORY
+            MAX_MEMORY=${MAX_MEMORY:-$DEFAULT_MAX_MEMORY}
+
+            # 创建 config.json
+            echo "正在创建 config.json 文件..."
+            echo "{
+  \"RCON_HOST\": \"$RCON_HOST\",
+  \"RCON_PORT\": \"$RCON_PORT\",
+  \"RCON_PASSWORD\": \"$RCON_PASSWORD\",
+  \"MAX_MEMORY\": \"$MAX_MEMORY\",
+  \"MEMORY_USAGE_THRESHOLD\": \"$MEMORY_USAGE_THRESHOLD\"
+}" > config.json
+
+            echo "config.json 文件已创建。"
+        else
+            echo "没有创建 config.json 文件。"
+        fi
+    else
+        echo "config.json 文件已存在。"
+    fi
+}
 
 #root权限
 root_need(){
@@ -156,11 +242,8 @@ install_pal_server(){
     if check_docker_container; then
         echo -e "${Red}幻兽帕鲁服务端已存在，安装失败！${Font}"
     else
-        echo -e "请输入幻兽帕鲁服务端可占用的最大内存，建议取值为用户服务器最大内存 - 2"
-        read -p "请输入数字 :" maxSize
-        check_numeric_input maxSize
         echo -e "${Green}开始安装幻兽帕鲁服务端...${Font}"
-        CONTAINER_ID=$(docker run -dit -m=$maxSizeG --restart=always --name steamcmd --net host cm2network/steamcmd)
+        CONTAINER_ID=$(docker run -dit --name steamcmd --net host cm2network/steamcmd)
         check_result "创建 Docker 容器"
         docker exec -it $CONTAINER_ID bash -c "/home/steam/steamcmd/steamcmd.sh +login anonymous +app_update 2394010 validate +quit"
         check_result "安装游戏"
@@ -497,6 +580,35 @@ add_backup(){
         echo -e "${Red}备份脚本不存在或者服务端未安装，增加定时备份失败！${Font}"
     fi
 }
+# 增加定期检测内存占用，超过则存档并重启容器
+add_rcon_restart(){
+    check_bc
+    check_docker_container
+    check_mcrcon
+    check_rcon
+    if [ $? -eq 0 ]; then
+        echo -e "${Green}请先输入你的服务器配置${Font}"
+        create_config
+        echo -e "${Green}开始增加定时检测...${Font}"
+        echo -e "${Green}1、每5分钟${Font}"
+        echo -e "${Green}2、每10分钟${Font}"
+        read -p "请输入数字 [1-2]:" num
+        case "$num" in
+            1)
+            add_task_to_crontab "*/5 * * * * /bin/bash $(pwd)/rcon.sh >> $(pwd)/crontab.log"
+            ;;
+            2)
+            add_task_to_crontab "*/10 * * * * /bin/bash $(pwd)/rcon.sh >> $(pwd)/crontab.log"
+            ;;
+            *)
+            echo -e "${Red}请输入正确数字 [1-2]${Font}"
+            ;;
+        esac
+        echo -e "${Green}定期检测已成功增加！，当将要重启时游戏内会收到系统发出的提示。并且有30秒的倒计时${Font}"
+    else
+        echo -e "${Red}备份脚本不存在或者服务端未安装，增加定时备份失败！${Font}"
+    fi
+}
 
 #开始菜单
 main(){
@@ -524,9 +636,10 @@ echo -e "${Green}12、更新补丁版本${Font}"
 echo -e "${Green}13、导入幻兽帕鲁存档及配置${Font}"
 echo -e "${Green}14、导出幻兽帕鲁存档及配置${Font}"
 echo -e "${Green}15、增加定时备份幻兽帕鲁存档及配置${Font}"
-echo -e "${Green}16、退出脚本${Font}"
+echo -e "${Green}16、增加定时容器内存占用检测，超出存档并重启${Font}"
+echo -e "${Green}17、退出脚本${Font}"
 echo -e "———————————————————————————————————————"
-read -p "请输入数字 [1-15]:" num
+read -p "请输入数字 [1-17]:" num
 check_numeric_input $num
 case "$num" in
     1)
@@ -553,7 +666,7 @@ case "$num" in
     8)
     restart_pal_server
     ;;
-   9)
+    9)
     check_pal_server_status
     ;;
 	10)
@@ -575,12 +688,15 @@ case "$num" in
     add_backup
     ;;
     16)
+    add_rcon_restart
+    ;;
+    17)
     echo -e "${Green}退出脚本...${Font}"
     exit 0
     ;;
     *)
     clear
-    echo -e "${Green}请输入正确数字 [1-15]${Font}"
+    echo -e "${Green}请输入正确数字 [1-17]${Font}"
     sleep 2s
     main
     ;;

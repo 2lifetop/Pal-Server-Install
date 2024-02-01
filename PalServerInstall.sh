@@ -356,20 +356,20 @@ add_restart(){
     check_docker_container
     if [ $? -eq 0 ]; then
         echo -e "${Green}开始增加定时重启...${Font}"
-        echo -e "${Green}1、每天凌晨5点${Font}"
-        echo -e "${Green}2、每周三凌晨5点${Font}"
+        echo -e "${Green}1、每天凌晨5点10分${Font}"
+        echo -e "${Green}2、每周三凌晨5点10分${Font}"
         echo -e "${Green}3、每多少小时重启一次${Font}"
         read -p "请输入数字 [1-3]:" num
         case "$num" in
             1)
-            add_task_to_crontab "0 5 * * * /bin/bash $(pwd)/restart.sh >> $(pwd)/crontab.log"
+            add_task_to_crontab "10 5 * * * /bin/bash $(pwd)/restart.sh >> $(pwd)/crontab.log"
             ;;
             2)
-            add_task_to_crontab "0 5 * * 3 /bin/bash $(pwd)/restart.sh >> $(pwd)/crontab.log"
+            add_task_to_crontab "10 5 * * 3 /bin/bash $(pwd)/restart.sh >> $(pwd)/crontab.log"
             ;;
             3)
             read -p "请输入每多少小时重启一次:" hours
-            add_task_to_crontab "0 */$hours * * * /bin/bash $(pwd)/restart.sh >> $(pwd)/crontab.log"
+            add_task_to_crontab "10 */$hours * * * /bin/bash $(pwd)/restart.sh >> $(pwd)/crontab.log"
             ;;
             *)
             echo -e "${Red}请输入正确数字 [1-3]${Font}"

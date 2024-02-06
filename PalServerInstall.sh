@@ -696,7 +696,7 @@ case "$num" in
     ;;
     *)
     clear
-    echo -e "${Green}请输入正确数字 [1-17]${Font}"
+    echo -e "${Green}请输入正确数字 [0-16]${Font}"
     sleep 2s
     main
     ;;

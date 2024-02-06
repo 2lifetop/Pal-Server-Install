@@ -14,7 +14,7 @@ check_docker_container() {
 }
 export_pal_server() {
     if check_docker_container; then
-        local timestamp=$(date "+%Y-%m-%d_%H:%M:%S")
+        local timestamp=$(date "+%Y-%m-%d_%H-%M-%S")
         local backup_dir="/data/backup/backup_$timestamp/"
         echo -e "${Green}此操作会导出容器内 /home/steam/Steam/steamapps/common/PalServer/Pal/Saved 文件夹下所有的文件${Font}"
         echo -e "${Green}导出的幻兽帕鲁存档及配置将会存放在 $backup_dir 目录下！${Font}"

@@ -1,6 +1,6 @@
 #!/bin/bash
 # 当前的脚本版本
-currentScriptVersion="0.1.9"
+currentScriptVersion="0.2.0"
 # 定义一些颜色和格式
 Green="\033[32m"
 Font="\033[0m"

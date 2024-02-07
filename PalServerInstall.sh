@@ -621,6 +621,7 @@ echo -e "${Green}Linux VPS一键安装管理幻兽帕鲁服务端脚本${Font}"
 echo -e "${Green}脚本版本${currentScriptVersion}${Font}"
 echo -e "${Green}教程地址：https://www.xuehaiwu.com/palworld-server/${Font}"
 echo -e "${Green}服务器购买：https://curl.qcloud.com/WJYPYPoQ ${Font}"
+echo -e "${Green}0、退出脚本${Font}"
 echo -e "${Green}1、安装幻兽帕鲁服务端${Font}"
 echo -e "${Green}2、启动幻兽帕鲁服务端${Font}"
 echo -e "${Green}3、停止幻兽帕鲁服务端${Font}"
@@ -637,11 +638,14 @@ echo -e "${Green}13、导入幻兽帕鲁存档及配置${Font}"
 echo -e "${Green}14、导出幻兽帕鲁存档及配置${Font}"
 echo -e "${Green}15、增加定时备份幻兽帕鲁存档及配置${Font}"
 echo -e "${Green}16、增加定时容器内存占用检测，超出存档并重启${Font}"
-echo -e "${Green}17、退出脚本${Font}"
 echo -e "———————————————————————————————————————"
-read -p "请输入数字 [1-17]:" num
+read -p "请输入数字 [0-16]:" num
 check_numeric_input $num
 case "$num" in
+    0)
+    echo -e "${Green}退出脚本...${Font}"
+    exit 0
+    ;;
     1)
     install_pal_server
     ;;
@@ -690,13 +694,9 @@ case "$num" in
     16)
     add_rcon_restart
     ;;
-    17)
-    echo -e "${Green}退出脚本...${Font}"
-    exit 0
-    ;;
     *)
     clear
-    echo -e "${Green}请输入正确数字 [1-17]${Font}"
+    echo -e "${Green}请输入正确数字 [0-16]${Font}"
     sleep 2s
     main
     ;;

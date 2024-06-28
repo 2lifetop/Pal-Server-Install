@@ -59,7 +59,7 @@ if ! [ -x "$(command -v mkswap)" ] || ! [ -x "$(command -v swapon)" ]; then
 fi
 
 # 从服务器获取版本信息
-versionInfo=$(curl -s https://www.xuehaiwu.com/wp-content/uploads/shell/Pal/version.json)
+versionInfo=$(curl -s https://mirror.ghproxy.com/https://raw.githubusercontent.com/2lifetop/Pal-Server-Install/main/data/version.json)
 check_result "获取版本信息"
 
 # 解析JSON以获取最新的版本和下载链接
@@ -80,7 +80,7 @@ fi
 if [[ $(echo -e "$currentScriptVersion\n$latestScriptVersion" | sort -V | head -n 1) != $latestScriptVersion ]]; then
     echo "新的脚本版本可用，你的版本为 $currentScriptVersion，最新版本为 $latestScriptVersion。正在下载新版本..."
     # 下载新版本的脚本
-    curl -O https://www.xuehaiwu.com/wp-content/uploads/shell/Pal/PalServerInstall.sh
+    curl -O https://mirror.ghproxy.com/https://raw.githubusercontent.com/2lifetop/Pal-Server-Install/main/data/PalServerInstall.sh
     check_result "下载新版本的脚本"
     chmod +x PalServerInstall.sh
     exit
@@ -107,14 +107,14 @@ fi
 check_mcrcon(){
     if [ ! -f "$(pwd)/mcrcon" ]; then
         echo -e "${Red}当前目录不包含备份脚本，正在下载...${Font}"
-        wget -O mcrcon https://www.xuehaiwu.com/wp-content/uploads/shell/Pal/mcrcon --no-check-certificate && chmod +x mcrcon
+        wget -O mcrcon https://mirror.ghproxy.com/https://raw.githubusercontent.com/2lifetop/Pal-Server-Install/main/data/mcrcon --no-check-certificate && chmod +x mcrcon
     fi
 }
 #检测rcon.sh
 check_rcon(){
     if [ ! -f "$(pwd)/rcon.sh" ]; then
         echo -e "${Red}当前目录不包含备份脚本，正在下载...${Font}"
-        wget -O rcon.sh https://www.xuehaiwu.com/wp-content/uploads/shell/Pal/rcon.sh --no-check-certificate && chmod +x rcon.sh
+        wget -O rcon.sh https://mirror.ghproxy.com/https://raw.githubusercontent.com/2lifetop/Pal-Server-Install/main/data/rcon.sh --no-check-certificate && chmod +x rcon.sh
     fi
 }
 # 创建rcon配置
@@ -211,7 +211,7 @@ install_docker(){
 check_restart_script(){
     if [ ! -f "$(pwd)/restart.sh" ]; then
         echo -e "${Red}当前目录不包含备份脚本，正在下载...${Font}"
-        wget -O restart.sh https://www.xuehaiwu.com/wp-content/uploads/shell/Pal/restart.sh --no-check-certificate && chmod +x restart.sh
+        wget -O restart.sh https://mirror.ghproxy.com/https://raw.githubusercontent.com/2lifetop/Pal-Server-Install/main/data/restart.sh --no-check-certificate && chmod +x restart.sh
     fi
 }
 #运行重启脚本
@@ -229,7 +229,7 @@ run_restart_script(){
 check_backup_script(){
     if [ ! -f "$(pwd)/backup.sh" ]; then
         echo -e "${Red}当前目录不包含备份脚本，正在下载...${Font}"
-        wget -O backup.sh https://www.xuehaiwu.com/wp-content/uploads/shell/Pal/backup.sh --no-check-certificate && chmod +x backup.sh
+        wget -O backup.sh https://mirror.ghproxy.com/https://raw.githubusercontent.com/2lifetop/Pal-Server-Install/main/data/backup.sh --no-check-certificate && chmod +x backup.sh
     fi
 }
 
